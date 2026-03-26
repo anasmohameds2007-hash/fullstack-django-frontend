@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiUrl } from '../api';
 import "./SignupPage.css";
 
 export default function SignupPage() {
@@ -30,13 +31,35 @@ export default function SignupPage() {
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length > 0) return setErrors(errs);
-    localStorage.setItem("signupData", JSON.stringify({ email: form.email, name: form.name }));
-    setSubmitted(true);
-    setTimeout(() => navigate("/login"), 1200);
+    
+    try {
+      const response = await fetch(apiUrl('/api/auth/register'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          name: form.name, 
+          email: form.email, 
+          phone: form.phone, 
+          password: form.password 
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+      // Store token
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem("signupData", JSON.stringify({ email: form.email, name: form.name }));
+      setSubmitted(true);
+      setTimeout(() => navigate("/login"), 1200);
+    } catch (err) {
+      setErrors({ submit: err.message });
+    }
   };
 
   const fields = [
@@ -82,6 +105,7 @@ export default function SignupPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="signup-form" noValidate>
+            {errors.submit && <div className="error-msg" style={{ marginBottom: '1rem', textAlign: 'center' }}>{errors.submit}</div>}
             {fields.map(({ name, label, type, icon }) => (
               <div
                 key={name}

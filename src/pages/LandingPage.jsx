@@ -1,33 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiUrl } from '../api';
 import "./LandingPage.css";
 
-const PRODUCTS = [
-  { id: 1, name: "AirPods Pro Max", cat: "Audio", price: 24999, oldPrice: 32000, badge: "HOT", emoji: "🎧", rating: 4.9, reviews: 2841 },
-  { id: 2, name: "Ultrabook X1", cat: "Laptops", price: 89999, oldPrice: 109999, badge: "NEW", emoji: "💻", rating: 4.7, reviews: 1203 },
-  { id: 3, name: "SmartWatch Pro", cat: "Wearables", price: 14999, oldPrice: 19999, badge: "DEAL", emoji: "⌚", rating: 4.8, reviews: 3402 },
-  { id: 4, name: "MechKeyboard RGB", cat: "Accessories", price: 7499, oldPrice: 9999, badge: "", emoji: "⌨️", rating: 4.6, reviews: 892 },
-  { id: 5, name: "4K Webcam Ultra", cat: "Cameras", price: 11999, oldPrice: 15999, badge: "HOT", emoji: "📷", rating: 4.5, reviews: 567 },
-  { id: 6, name: "Gaming Mouse X", cat: "Accessories", price: 4999, oldPrice: 6999, badge: "", emoji: "🖱️", rating: 4.7, reviews: 2103 },
-  { id: 7, name: "Curved Monitor 32\"", cat: "Displays", price: 34999, oldPrice: 42999, badge: "DEAL", emoji: "🖥️", rating: 4.9, reviews: 741 },
-  { id: 8, name: "NoiseBuds X3", cat: "Audio", price: 3999, oldPrice: 5999, badge: "NEW", emoji: "🎵", rating: 4.4, reviews: 1890 },
-
-  // NEW PRODUCTS
-  { id: 9, name: "Portable Speaker Boom", cat: "Audio", price: 6999, oldPrice: 8999, badge: "HOT", emoji: "🔊", rating: 4.6, reviews: 1523 },
-  { id: 10, name: "Fitness Band Lite", cat: "Wearables", price: 2999, oldPrice: 4999, badge: "", emoji: "🎽", rating: 4.3, reviews: 1105 },
-  { id: 11, name: "Drone X Pro", cat: "Cameras", price: 45999, oldPrice: 59999, badge: "DEAL", emoji: "🛸", rating: 4.8, reviews: 632 },
-  { id: 12, name: "VR Headset Neo", cat: "Accessories", price: 22999, oldPrice: 29999, badge: "NEW", emoji: "🕶️", rating: 4.7, reviews: 891 },
-  { id: 13, name: "Smartphone Z12", cat: "Phones", price: 55999, oldPrice: 67999, badge: "HOT", emoji: "📱", rating: 4.9, reviews: 3241 },
-  { id: 14, name: "Laptop Stand Pro", cat: "Accessories", price: 1999, oldPrice: 2499, badge: "", emoji: "🛠️", rating: 4.5, reviews: 712 },
-  { id: 15, name: "Action Camera 4K", cat: "Cameras", price: 14999, oldPrice: 19999, badge: "DEAL", emoji: "🎬", rating: 4.6, reviews: 432 },
-  { id: 16, name: "Wireless Charger Pad", cat: "Accessories", price: 1499, oldPrice: 1999, badge: "", emoji: "🔌", rating: 4.4, reviews: 650 },
-  { id: 17, name: "Gaming Headset XLR", cat: "Audio", price: 8999, oldPrice: 11999, badge: "HOT", emoji: "🎧", rating: 4.7, reviews: 980 },
-  { id: 18, name: "Ultra HD Monitor 27\"", cat: "Displays", price: 24999, oldPrice: 32999, badge: "DEAL", emoji: "🖥️", rating: 4.8, reviews: 540 },
-  { id: 19, name: "Smart Glasses V2", cat: "Wearables", price: 18999, oldPrice: 22999, badge: "NEW", emoji: "🕶️", rating: 4.5, reviews: 425 },
-  { id: 20, name: "Bluetooth Earbuds S", cat: "Audio", price: 3499, oldPrice: 4999, badge: "", emoji: "🎵", rating: 4.4, reviews: 1120 },
-];
-
-const CATEGORIES = ["All", "Audio", "Laptops", "Wearables", "Accessories", "Cameras", "Displays"];
+const CATEGORIES = ["All", "Audio", "Laptops", "Wearables", "Accessories", "Cameras", "Displays", "Phones"];
 
 const HEROES = [
   { tag: "Flash Sale", title: "Beats by Sound", sub: "Up to 50% off on premium audio gear", cta: "Shop Audio", bg: "#ff4d00", accent: "#ffb800", emoji: "🎧" },
@@ -42,8 +18,23 @@ const STATS = [
   { n: "24/7", label: "Customer Support" },
 ];
 
+// Helper for authenticated fetch calls
+const authFetch = async (url, options = {}) => {
+  const token = localStorage.getItem('token');
+  return fetch(apiUrl(url), {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...options.headers,
+    }
+  });
+};
+
 export default function LandingPage() {
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
   const [heroIdx, setHeroIdx] = useState(0);
   const [cart, setCart] = useState([]);
@@ -54,6 +45,80 @@ export default function LandingPage() {
   const [toast, setToast] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const timerRef = useRef(null);
+
+  const isLoggedIn = () => !!localStorage.getItem('token');
+
+  // Fetch products from API
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      let url = '/api/products';
+      const params = new URLSearchParams();
+      if (activeCategory !== 'All') {
+        params.append('category', activeCategory);
+      }
+      if (searchQuery.trim()) {
+        params.append('search', searchQuery.trim());
+      }
+      if (params.toString()) {
+        url += '?' + params.toString();
+      }
+      const response = await fetch(apiUrl(url));
+      const data = await response.json();
+      if (response.ok) {
+        setProducts(data.products || []);
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [activeCategory, searchQuery]);
+
+  // Fetch cart from API
+  const fetchCart = useCallback(async () => {
+    if (!isLoggedIn()) return;
+    try {
+      const response = await authFetch('/api/cart');
+      const data = await response.json();
+      if (response.ok && data.cart) {
+        // Transform cart items to match the UI format
+        const cartItems = data.cart.items.map(item => ({
+          ...item.productId,
+          quantity: item.quantity
+        }));
+        setCart(cartItems);
+      }
+    } catch (err) {
+      console.error('Error fetching cart:', err);
+    }
+  }, []);
+
+  // Fetch wishlist from API
+  const fetchWishlist = useCallback(async () => {
+    if (!isLoggedIn()) return;
+    try {
+      const response = await authFetch('/api/wishlist');
+      const data = await response.json();
+      if (response.ok && data.wishlist) {
+        // Extract product IDs for the wishlist state
+        const wishlistIds = data.wishlist.products.map(p => p._id);
+        setWishlist(wishlistIds);
+      }
+    } catch (err) {
+      console.error('Error fetching wishlist:', err);
+    }
+  }, []);
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    fetchCart();
+    fetchWishlist();
+  }, [fetchCart, fetchWishlist]);
 
   useEffect(() => {
     timerRef.current = setInterval(() => setHeroIdx((i) => (i + 1) % HEROES.length), 4500);
@@ -66,19 +131,83 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const filtered = PRODUCTS.filter((p) => {
-    const matchCat = activeCategory === "All" || p.cat === activeCategory;
-    const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  const filtered = products;
 
-  const addToCart = (product) => {
-    setCart((c) => [...c, product]);
-    showToast(`${product.emoji} Added to cart!`);
+  const addToCart = async (product) => {
+    if (!isLoggedIn()) {
+      // Client-side only for unauthenticated users
+      setCart((c) => [...c, product]);
+      showToast(`${product.emoji} Added to cart!`);
+      return;
+    }
+
+    try {
+      const response = await authFetch('/api/cart/add', {
+        method: 'POST',
+        body: JSON.stringify({ productId: product._id, quantity: 1 })
+      });
+      const data = await response.json();
+      if (response.ok && data.cart) {
+        const cartItems = data.cart.items.map(item => ({
+          ...item.productId,
+          quantity: item.quantity
+        }));
+        setCart(cartItems);
+        showToast(`${product.emoji} Added to cart!`);
+      }
+    } catch (err) {
+      console.error('Error adding to cart:', err);
+      // Fallback to client-side
+      setCart((c) => [...c, product]);
+      showToast(`${product.emoji} Added to cart!`);
+    }
   };
 
-  const toggleWishlist = (id) => {
-    setWishlist((w) => w.includes(id) ? w.filter((x) => x !== id) : [...w, id]);
+  const removeFromCart = async (productId) => {
+    if (!isLoggedIn()) {
+      setCart((c) => c.filter((p) => p._id !== productId));
+      return;
+    }
+
+    try {
+      const response = await authFetch(`/api/cart/remove/${productId}`, {
+        method: 'DELETE'
+      });
+      const data = await response.json();
+      if (response.ok && data.cart) {
+        const cartItems = data.cart.items.map(item => ({
+          ...item.productId,
+          quantity: item.quantity
+        }));
+        setCart(cartItems);
+      }
+    } catch (err) {
+      console.error('Error removing from cart:', err);
+    }
+  };
+
+  const toggleWishlist = async (productId) => {
+    if (!isLoggedIn()) {
+      // Client-side only for unauthenticated users
+      setWishlist((w) => w.includes(productId) ? w.filter((x) => x !== productId) : [...w, productId]);
+      return;
+    }
+
+    try {
+      const response = await authFetch('/api/wishlist/add', {
+        method: 'POST',
+        body: JSON.stringify({ productId })
+      });
+      const data = await response.json();
+      if (response.ok && data.wishlist) {
+        const wishlistIds = data.wishlist.products.map(p => p._id);
+        setWishlist(wishlistIds);
+      }
+    } catch (err) {
+      console.error('Error toggling wishlist:', err);
+      // Fallback to client-side
+      setWishlist((w) => w.includes(productId) ? w.filter((x) => x !== productId) : [...w, productId]);
+    }
   };
 
   const showToast = (msg) => {
@@ -157,10 +286,16 @@ export default function LandingPage() {
             ) : (
               <>
                 {cart.slice(-4).map((p, i) => (
-                  <div key={i} className="cart-item">
+                  <div key={p._id || i} className="cart-item">
                     <span>{p.emoji}</span>
                     <span>{p.name}</span>
                     <span className="cart-item-price">₹{p.price.toLocaleString()}</span>
+                    <button 
+                      onClick={() => removeFromCart(p._id)} 
+                      style={{ marginLeft: '0.5rem', cursor: 'pointer', background: 'none', border: 'none', color: '#ff4d4d' }}
+                    >
+                      ✕
+                    </button>
                   </div>
                 ))}
                 <div className="cart-total">
@@ -250,41 +385,47 @@ export default function LandingPage() {
           <p>Handpicked for you</p>
         </div>
 
-        <div className="products-grid">
-          {filtered.map((product, idx) => (
-            <div key={product.id} className="product-card" style={{ "--delay": `${idx * 0.05}s` }}>
-              {product.badge && (
-                <span className={`p-badge badge-${product.badge.toLowerCase()}`}>{product.badge}</span>
-              )}
-              <button
-                className={`p-wish ${wishlist.includes(product.id) ? "wished" : ""}`}
-                onClick={() => toggleWishlist(product.id)}
-              >
-                {wishlist.includes(product.id) ? "♥" : "♡"}
-              </button>
-              <div className="p-emoji-wrap">
-                <div className="p-emoji">{product.emoji}</div>
-              </div>
-              <div className="p-info">
-                <span className="p-cat">{product.cat}</span>
-                <h3 className="p-name">{product.name}</h3>
-                <div className="p-rating">
-                  {"★".repeat(Math.floor(product.rating))}
-                  <span className="p-rating-n">{product.rating}</span>
-                  <span className="p-reviews">({product.reviews.toLocaleString()})</span>
+        {loading ? (
+          <div className="products-loading" style={{ textAlign: 'center', padding: '3rem' }}>
+            Loading products...
+          </div>
+        ) : (
+          <div className="products-grid">
+            {filtered.map((product, idx) => (
+              <div key={product._id} className="product-card" style={{ "--delay": `${idx * 0.05}s` }}>
+                {product.badge && (
+                  <span className={`p-badge badge-${product.badge.toLowerCase()}`}>{product.badge}</span>
+                )}
+                <button
+                  className={`p-wish ${wishlist.includes(product._id) ? "wished" : ""}`}
+                  onClick={() => toggleWishlist(product._id)}
+                >
+                  {wishlist.includes(product._id) ? "♥" : "♡"}
+                </button>
+                <div className="p-emoji-wrap">
+                  <div className="p-emoji">{product.emoji}</div>
                 </div>
-                <div className="p-pricing">
-                  <span className="p-price">₹{product.price.toLocaleString()}</span>
-                  <span className="p-old">₹{product.oldPrice.toLocaleString()}</span>
-                  <span className="p-off">-{discount(product)}%</span>
+                <div className="p-info">
+                  <span className="p-cat">{product.cat}</span>
+                  <h3 className="p-name">{product.name}</h3>
+                  <div className="p-rating">
+                    {"★".repeat(Math.floor(product.rating))}
+                    <span className="p-rating-n">{product.rating}</span>
+                    <span className="p-reviews">({product.reviews.toLocaleString()})</span>
+                  </div>
+                  <div className="p-pricing">
+                    <span className="p-price">₹{product.price.toLocaleString()}</span>
+                    <span className="p-old">₹{product.oldPrice.toLocaleString()}</span>
+                    <span className="p-off">-{discount(product)}%</span>
+                  </div>
                 </div>
+                <button className="p-add-btn" onClick={() => addToCart(product)}>
+                  Add to Cart
+                </button>
               </div>
-              <button className="p-add-btn" onClick={() => addToCart(product)}>
-                Add to Cart
-              </button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* PROMO BANNER */}

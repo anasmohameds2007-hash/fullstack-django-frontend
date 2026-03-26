@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiUrl } from '../api';
 import "./Login.css";
 import Prism from "./Prism";
 
@@ -33,17 +34,32 @@ export default function LoginPage() {
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length > 0) return setErrors(errs);
     setLoading(true);
-    setTimeout(() => {
+    
+    try {
+      const response = await fetch(apiUrl('/api/auth/login'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.email, password: form.password })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('loggedIn', 'true');
       setLoading(false);
       setSuccess(true);
-      localStorage.setItem("loggedIn", "true");
       setTimeout(() => navigate("/"), 1000);
-    }, 1800);
+    } catch (err) {
+      setLoading(false);
+      setErrors({ submit: err.message });
+    }
   };
 
   return (
@@ -82,6 +98,7 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="login-form" noValidate>
+            {errors.submit && <div className="lf-error" style={{ marginBottom: '1rem', textAlign: 'center' }}>{errors.submit}</div>}
             {/* EMAIL */}
             <div className={`lf-group ${focused === "email" ? "focused" : ""} ${errors.email ? "error" : ""} ${form.email ? "filled" : ""}`}>
               <label>Email Address</label>
