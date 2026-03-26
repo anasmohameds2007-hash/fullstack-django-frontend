@@ -96,10 +96,28 @@ export default function LandingPage() {
 
       {/* NAV */}
       <nav className={`lp-nav ${scrolled ? "scrolled" : ""}`}>
-        <div className="nav-logo">⚡ NEXUS</div>
+        <div className="nav-logo" onClick={() => window.scrollTo(0, 0)}>⚡ NEXUS</div>
         <div className="nav-links">
-          {["Home", "Shop", "Deals", "Categories", "About"].map((l) => (
-            <a key={l} href="#" className="nav-link">{l}</a>
+          {[
+            { label: "Home", href: "/" },
+            { label: "Shop", href: "#products" },
+            { label: "Deals", href: "#deals" },
+            { label: "Categories", href: "#categories" },
+            { label: "About", href: "/about" }
+          ].map((link) => (
+            <a 
+              key={link.label} 
+              href={link.href} 
+              className="nav-link"
+              onClick={(e) => {
+                if (link.href.startsWith("/")) {
+                  e.preventDefault();
+                  navigate(link.href);
+                }
+              }}
+            >
+              {link.label}
+            </a>
           ))}
         </div>
         <div className="nav-actions">
