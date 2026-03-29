@@ -3,7 +3,9 @@
  * Centralized API client for E-Commerce AI
  */
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// For production deployment - DO NOT commit this change
+const API_URL = 'https://ecommerce-ai-server-fgze.onrender.com/api';
+// Original: const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 /**
  * Build full API URL
