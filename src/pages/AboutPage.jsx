@@ -1,6 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getCurrentUser, logout } from '../utils/auth';
+import Avatar from '../components/Avatar';
 import "./AboutPage.css";
 
 export default function AboutPage() {
@@ -39,10 +40,10 @@ export default function AboutPage() {
   ];
 
   const team = [
-    { name: "Alex Chen", role: "CEO & Founder", emoji: "👨‍💼" },
-    { name: "Sarah Williams", role: "COO", emoji: "👩‍💼" },
-    { name: "Marcus Johnson", role: "CTO", emoji: "👨‍💻" },
-    { name: "Priya Sharma", role: "Head of Operations", emoji: "👩‍💼" },
+    { name: "Anas Mohamed", role: "CEO & Founder", emoji: "👨‍💼" },
+    { name: "Shek Irfan", role: "COO", emoji: "👩‍💼" },
+    { name: "Hussain Sherief", role: "CTO", emoji: "👨‍💻" },
+    { name: "Dharmalingam", role: "Head of Operations", emoji: "�‍💼" },
   ];
 
   return (
@@ -51,15 +52,22 @@ export default function AboutPage() {
       <nav className="about-nav">
         <div className="nav-logo" onClick={() => navigate("/")}>⚡ NEXUS</div>
         <div className="nav-links">
-          {["Home", "Shop", "Deals", "Categories"].map((l) => (
-            <a key={l} href="#" className="nav-link" onClick={(e) => {
-              e.preventDefault();
-              if (l === "Home") navigate("/");
-            }}>{l}</a>
-          ))}
+          <Link to="/" className="nav-link">Home</Link>
+          <Link to="/shop" className="nav-link">Shop</Link>
+          <Link to="/deals" className="nav-link">Deals</Link>
+          <Link to="/categories" className="nav-link">Categories</Link>
+          <Link to="/about" className="nav-link active">About</Link>
         </div>
         <button className="nav-profile" onClick={handleProfileClick}>
-          {user ? user.name.split(' ')[0] : 'Sign In'}
+          {user ? (
+            <Avatar 
+              name={user.name} 
+              size="medium"
+              showTooltip={true}
+            />
+          ) : (
+            'Sign In'
+          )}
         </button>
       </nav>
 
@@ -247,28 +255,28 @@ export default function AboutPage() {
           <div className="footer-section">
             <h4>Quick Links</h4>
             <ul>
-              <li><a href="#">Shop</a></li>
-              <li><a href="#">Deals</a></li>
-              <li><a href="#">Categories</a></li>
-              <li><a href="#">About</a></li>
+              <li><button onClick={() => navigate("/shop")} className="footer-link">Shop</button></li>
+              <li><button onClick={() => navigate("/deals")} className="footer-link">Deals</button></li>
+              <li><button onClick={() => navigate("/categories")} className="footer-link">Categories</button></li>
+              <li><button onClick={() => navigate("/about")} className="footer-link">About</button></li>
             </ul>
           </div>
           <div className="footer-section">
             <h4>Policies</h4>
             <ul>
-              <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#">Terms & Conditions</a></li>
-              <li><a href="#">Return Policy</a></li>
-              <li><a href="#">Shipping Info</a></li>
+              <li><button onClick={() => {}} className="footer-link">Privacy Policy</button></li>
+              <li><button onClick={() => {}} className="footer-link">Terms & Conditions</button></li>
+              <li><button onClick={() => {}} className="footer-link">Return Policy</button></li>
+              <li><button onClick={() => {}} className="footer-link">Shipping Info</button></li>
             </ul>
           </div>
           <div className="footer-section">
             <h4>Follow Us</h4>
             <div className="social-links">
-              <a href="#">Facebook</a>
-              <a href="#">Twitter</a>
-              <a href="#">Instagram</a>
-              <a href="#">LinkedIn</a>
+              <button onClick={() => {}} className="footer-link">Facebook</button>
+              <button onClick={() => {}} className="footer-link">Twitter</button>
+              <button onClick={() => {}} className="footer-link">Instagram</button>
+              <button onClick={() => {}} className="footer-link">LinkedIn</button>
             </div>
           </div>
         </div>

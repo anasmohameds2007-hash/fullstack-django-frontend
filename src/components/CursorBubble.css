@@ -1,0 +1,64 @@
+.cursor-bubble {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none; /* Allows clicking through bubbles */
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  animation: bubble-pop 1s ease-out forwards;
+  cursor: none; /* Hide default cursor during bubble animation */
+}
+
+@keyframes bubble-pop {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+/* Add a subtle glow effect */
+.cursor-bubble::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  filter: blur(2px);
+}
+
+/* Ripple effect container */
+.cursor-bubble::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 200%;
+    height: 200%;
+    opacity: 0;
+  }
+}

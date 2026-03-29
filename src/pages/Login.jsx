@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { apiUrl } from '../api';
 import { clearAllAuthData } from '../utils/auth';
+import GoogleLoginButton from '../components/GoogleLogin';
 import "./Login.css";
 import Prism from "./Prism";
 
@@ -16,14 +17,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     const saved = localStorage.getItem("signupData");
-    const user = localStorage.getItem("user");
     if (saved) {
-      const { email, name } = JSON.parse(saved);
+      const { email } = JSON.parse(saved);
       setForm((f) => ({ ...f, email }));
-      // Only show "Welcome back" if user was previously logged in
-      if (user) {
-        setPrefilled(true);
-      }
     }
   }, []);
 
@@ -163,12 +159,13 @@ export default function LoginPage() {
 
           <div className="login-divider"><span>or</span></div>
 
+          {/* Google OAuth Button */}
+          <GoogleLoginButton />
+
           <div className="social-btns">
-            {["Google", "Apple"].map((p) => (
-              <button key={p} className="social-btn">
-                {p === "Google" ? "G" : ""} Continue with {p}
-              </button>
-            ))}
+            <button className="social-btn" disabled>
+              Continue with Apple (Coming Soon)
+            </button>
           </div>
 
           <p className="signup-cta">

@@ -1,0 +1,174 @@
+/* Avatar Component Styles */
+.avatar-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 700;
+  font-family: 'Syne', sans-serif;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Avatar Colors - Based on initial letter */
+.avatar-red {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+  color: #fff;
+}
+
+.avatar-blue {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+  color: #fff;
+}
+
+.avatar-green {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  color: #fff;
+}
+
+.avatar-purple {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+}
+
+.avatar-orange {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  color: #fff;
+}
+
+.avatar-pink {
+  background: linear-gradient(135deg, #ff9a9e, #fecfef);
+  color: #fff;
+}
+
+.avatar-teal {
+  background: linear-gradient(135deg, #13547a, #80d0c7);
+  color: #fff;
+}
+
+.avatar-indigo {
+  background: linear-gradient(135deg, #3f51b5, #5a67d5);
+  color: #fff;
+}
+
+/* Avatar Sizes */
+.avatar-small {
+  width: 32px;
+  height: 32px;
+  font-size: 0.85rem;
+}
+
+.avatar-medium {
+  width: 40px;
+  height: 40px;
+  font-size: 1rem;
+}
+
+.avatar-large {
+  width: 48px;
+  height: 48px;
+  font-size: 1.2rem;
+}
+
+/* Interactive Avatar (Clickable) */
+.avatar-clickable {
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.avatar-clickable:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.avatar-clickable:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Avatar Initial */
+.avatar-initial {
+  position: relative;
+  z-index: 2;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Status Indicator (Optional) */
+.avatar-status {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #4ade80;
+  border: 2px solid #fff;
+  z-index: 3;
+}
+
+/* Avatar Animation on Load */
+@keyframes avatarPopIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.avatar-container {
+  animation: avatarPopIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tooltip for Avatar */
+.avatar-container[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26, 26, 46, 0.95);
+  color: #fff;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0;
+  animation: tooltipFadeIn 0.2s ease forwards;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .avatar-medium {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+  
+  .avatar-large {
+    width: 42px;
+    height: 42px;
+    font-size: 1.1rem;
+  }
+}

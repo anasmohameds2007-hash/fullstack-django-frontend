@@ -1,17 +1,346 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { getCurrentUser, logout } from '../utils/auth';
+import Avatar from '../components/Avatar';
 import "./LandingPage.css";
  
 const PRODUCTS = [
-  { id: 1, name: "AirPods Pro Max", cat: "Audio", price: 24999, oldPrice: 32000, badge: "HOT", emoji: "🎧", rating: 4.9, reviews: 2841 },
-  { id: 2, name: "Ultrabook X1", cat: "Laptops", price: 89999, oldPrice: 109999, badge: "NEW", emoji: "💻", rating: 4.7, reviews: 1203 },
-  { id: 3, name: "SmartWatch Pro", cat: "Wearables", price: 14999, oldPrice: 19999, badge: "DEAL", emoji: "⌚", rating: 4.8, reviews: 3402 },
-  { id: 4, name: "MechKeyboard RGB", cat: "Accessories", price: 7499, oldPrice: 9999, badge: "", emoji: "⌨️", rating: 4.6, reviews: 892 },
-  { id: 5, name: "4K Webcam Ultra", cat: "Cameras", price: 11999, oldPrice: 15999, badge: "HOT", emoji: "📷", rating: 4.5, reviews: 567 },
-  { id: 6, name: "Gaming Mouse X", cat: "Accessories", price: 4999, oldPrice: 6999, badge: "", emoji: "🖱️", rating: 4.7, reviews: 2103 },
-  { id: 7, name: "Curved Monitor 32\"", cat: "Displays", price: 34999, oldPrice: 42999, badge: "DEAL", emoji: "🖥️", rating: 4.9, reviews: 741 },
-  { id: 8, name: "NoiseBuds X3", cat: "Audio", price: 3999, oldPrice: 5999, badge: "NEW", emoji: "🎵", rating: 4.4, reviews: 1890 },
+  { 
+    id: 1, 
+    name: "AirPods Pro Max", 
+    cat: "Audio", 
+    price: 24999, 
+    oldPrice: 32000, 
+    badge: "HOT", 
+    emoji: "🎧", 
+    image: "https://images.unsplash.com/photo-1613040809024-b4ef7ba99bc3?w=500&h=500&fit=crop",
+    rating: 4.9, 
+    reviews: 2841 
+  },
+  { 
+    id: 2, 
+    name: "Ultrabook X1", 
+    cat: "Laptops", 
+    price: 89999, 
+    oldPrice: 109999, 
+    badge: "NEW", 
+    emoji: "💻", 
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&h=500&fit=crop",
+    rating: 4.7, 
+    reviews: 1203 
+  },
+  { 
+    id: 3, 
+    name: "SmartWatch Pro", 
+    cat: "Wearables", 
+    price: 14999, 
+    oldPrice: 19999, 
+    badge: "DEAL", 
+    emoji: "⌚", 
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&h=500&fit=crop",
+    rating: 4.8, 
+    reviews: 3402 
+  },
+  { 
+    id: 4, 
+    name: "MechKeyboard RGB", 
+    cat: "Accessories", 
+    price: 7499, 
+    oldPrice: 9999, 
+    badge: "", 
+    emoji: "⌨️", 
+    image: "https://images.unsplash.com/photo-1595225476474-87563907a212?w=500&h=500&fit=crop",
+    rating: 4.6, 
+    reviews: 892 
+  },
+  { 
+    id: 5, 
+    name: "4K Webcam Ultra", 
+    cat: "Cameras", 
+    price: 11999, 
+    oldPrice: 15999, 
+    badge: "HOT", 
+    emoji: "📷", 
+    image: "https://images.unsplash.com/photo-1587825137904-6e0881d9b5f0?w=500&h=500&fit=crop",
+    rating: 4.5, 
+    reviews: 567 
+  },
+  { 
+    id: 6, 
+    name: "Gaming Mouse X", 
+    cat: "Accessories", 
+    price: 4999, 
+    oldPrice: 6999, 
+    badge: "", 
+    emoji: "🖱️", 
+    image: "https://images.unsplash.com/photo-1527814050087-3793815479db?w=500&h=500&fit=crop",
+    rating: 4.7, 
+    reviews: 2103 
+  },
+  { 
+    id: 7, 
+    name: "Curved Monitor 32\"", 
+    cat: "Displays", 
+    price: 34999, 
+    oldPrice: 42999, 
+    badge: "DEAL", 
+    emoji: "🖥️", 
+    image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=500&h=500&fit=crop",
+    rating: 4.9, 
+    reviews: 741 
+  },
+  { 
+    id: 8, 
+    name: "NoiseBuds X3", 
+    cat: "Audio", 
+    price: 3999, 
+    oldPrice: 5999, 
+    badge: "NEW", 
+    emoji: "🎵", 
+    image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=500&h=500&fit=crop",
+    rating: 4.4, 
+    reviews: 1890 
+  },
+  { 
+    id: 9, 
+    name: "MacBook Pro 16\"", 
+    cat: "Laptops", 
+    price: 249999, 
+    oldPrice: 279999, 
+    badge: "HOT", 
+    emoji: "💻", 
+    image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca4?w=500&h=500&fit=crop",
+    rating: 4.9, 
+    reviews: 4521 
+  },
+  { 
+    id: 10, 
+    name: "Sony WH-1000XM5", 
+    cat: "Audio", 
+    price: 29999, 
+    oldPrice: 34999, 
+    badge: "DEAL", 
+    emoji: "🎧", 
+    image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=500&h=500&fit=crop",
+    rating: 4.8, 
+    reviews: 3892 
+  },
+  { 
+    id: 11, 
+    name: "Dell XPS 15", 
+    cat: "Laptops", 
+    price: 129999, 
+    oldPrice: 159999, 
+    badge: "", 
+    emoji: "💻", 
+    image: "https://images.unsplash.com/photo-1593642632823-8f78536788c6?w=500&h=500&fit=crop",
+    rating: 4.6, 
+    reviews: 987 
+  },
+  { 
+    id: 12, 
+    name: "Fitbit Charge 6", 
+    cat: "Wearables", 
+    price: 12999, 
+    oldPrice: 16999, 
+    badge: "NEW", 
+    emoji: "⌚", 
+    image: "https://images.unsplash.com/photo-1576243345690-4e4b79b63288?w=500&h=500&fit=crop",
+    rating: 4.5, 
+    reviews: 2341 
+  },
+  { 
+    id: 13, 
+    name: "USB-C Hub Pro", 
+    cat: "Accessories", 
+    price: 3499, 
+    oldPrice: 4999, 
+    badge: "", 
+    emoji: "🔌", 
+    image: "https://images.unsplash.com/photo-1625842268584-8f3296236761?w=500&h=500&fit=crop",
+    rating: 4.3, 
+    reviews: 1567 
+  },
+  { 
+    id: 14, 
+    name: "Canon EOS R6", 
+    cat: "Cameras", 
+    price: 189999, 
+    oldPrice: 219999, 
+    badge: "HOT", 
+    emoji: "📷", 
+    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&h=500&fit=crop",
+    rating: 4.9, 
+    reviews: 892 
+  },
+  { 
+    id: 15, 
+    name: "LG OLED 55\"", 
+    cat: "Displays", 
+    price: 149999, 
+    oldPrice: 179999, 
+    badge: "DEAL", 
+    emoji: "🖥️", 
+    image: "https://images.unsplash.com/photo-1593784697956-ec9c9bbd8dc9?w=500&h=500&fit=crop",
+    rating: 4.8, 
+    reviews: 1234 
+  },
+  { 
+    id: 16, 
+    name: "JBL Flip 6", 
+    cat: "Audio", 
+    price: 8999, 
+    oldPrice: 11999, 
+    badge: "", 
+    emoji: "🔊", 
+    image: "https://images.unsplash.com/photo-1543515816-18c6837265ea?w=500&h=500&fit=crop",
+    rating: 4.6, 
+    reviews: 2678 
+  },
+  { 
+    id: 17, 
+    name: "HP Spectre x360", 
+    cat: "Laptops", 
+    price: 149999, 
+    oldPrice: 179999, 
+    badge: "NEW", 
+    emoji: "💻", 
+    image: "https://images.unsplash.com/photo-1544731612-de7f96afe55f?w=500&h=500&fit=crop",
+    rating: 4.7, 
+    reviews: 756 
+  },
+  { 
+    id: 18, 
+    name: "Garmin Fenix 7", 
+    cat: "Wearables", 
+    price: 64999, 
+    oldPrice: 74999, 
+    badge: "HOT", 
+    emoji: "⌚", 
+    image: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=500&h=500&fit=crop",
+    rating: 4.9, 
+    reviews: 1892 
+  },
+  { 
+    id: 19, 
+    name: "Wireless Charger Pad", 
+    cat: "Accessories", 
+    price: 1999, 
+    oldPrice: 2999, 
+    badge: "", 
+    emoji: "🔋", 
+    image: "https://images.unsplash.com/photo-1616169997363-2e3c3c0e0a7e?w=500&h=500&fit=crop",
+    rating: 4.2, 
+    reviews: 3421 
+  },
+  { 
+    id: 20, 
+    name: "GoPro Hero 12", 
+    cat: "Cameras", 
+    price: 39999, 
+    oldPrice: 49999, 
+    badge: "DEAL", 
+    emoji: "📷", 
+    image: "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=500&h=500&fit=crop",
+    rating: 4.7, 
+    reviews: 2134 
+  },
+  { 
+    id: 21, 
+    name: "Samsung Odyssey G9", 
+    cat: "Displays", 
+    price: 99999, 
+    oldPrice: 129999, 
+    badge: "HOT", 
+    emoji: "🖥️", 
+    image: "https://images.unsplash.com/photo-1547082299-de196ea47f56?w=500&h=500&fit=crop",
+    rating: 4.8, 
+    reviews: 567 
+  },
+  { 
+    id: 22, 
+    name: "Sennheiser Momentum", 
+    cat: "Audio", 
+    price: 24999, 
+    oldPrice: 29999, 
+    badge: "", 
+    emoji: "🎧", 
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&h=500&fit=crop",
+    rating: 4.7, 
+    reviews: 1456 
+  },
+  { 
+    id: 23, 
+    name: "Lenovo ThinkPad X1", 
+    cat: "Laptops", 
+    price: 169999, 
+    oldPrice: 199999, 
+    badge: "NEW", 
+    emoji: "💻", 
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=500&h=500&fit=crop",
+    rating: 4.8, 
+    reviews: 892 
+  },
+  { 
+    id: 24, 
+    name: "Apple Watch Ultra 2", 
+    cat: "Wearables", 
+    price: 79999, 
+    oldPrice: 89999, 
+    badge: "HOT", 
+    emoji: "⌚", 
+    image: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=500&h=500&fit=crop",
+    rating: 4.9, 
+    reviews: 5678 
+  },
+  { 
+    id: 25, 
+    name: "Razer Blade Stealth", 
+    cat: "Accessories", 
+    price: 12999, 
+    oldPrice: 15999, 
+    badge: "DEAL", 
+    emoji: "🎮", 
+    image: "https://images.unsplash.com/photo-1593305841991-05c29736760b?w=500&h=500&fit=crop",
+    rating: 4.5, 
+    reviews: 1234 
+  },
+  { 
+    id: 26, 
+    name: "Nikon Z8", 
+    cat: "Cameras", 
+    price: 279999, 
+    oldPrice: 319999, 
+    badge: "NEW", 
+    emoji: "📷", 
+    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&h=500&fit=crop",
+    rating: 4.9, 
+    reviews: 456 
+  },
+  { 
+    id: 27, 
+    name: "ASUS ROG Swift", 
+    cat: "Displays", 
+    price: 79999, 
+    oldPrice: 99999, 
+    badge: "", 
+    emoji: "🖥️", 
+    image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=500&h=500&fit=crop",
+    rating: 4.7, 
+    reviews: 789 
+  },
+  { 
+    id: 28, 
+    name: "Bose QuietComfort", 
+    cat: "Audio", 
+    price: 22999, 
+    oldPrice: 27999, 
+    badge: "DEAL", 
+    emoji: "🎧", 
+    image: "https://images.unsplash.com/photo-1524678606372-987d7e66c99f?w=500&h=500&fit=crop",
+    rating: 4.6, 
+    reviews: 2345 
+  },
 ];
  
 const CATEGORIES = ["All", "Audio", "Laptops", "Wearables", "Accessories", "Cameras", "Displays"];
@@ -31,7 +360,9 @@ const STATS = [
  
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [searchParams] = useSearchParams();
+  const urlCategory = searchParams.get('category');
+  const [activeCategory, setActiveCategory] = useState(urlCategory || "All");
   const [heroIdx, setHeroIdx] = useState(0);
   const [cart, setCart] = useState([]);
   const [cartPop, setCartPop] = useState(false);
@@ -105,9 +436,11 @@ export default function LandingPage() {
       <nav className={`lp-nav ${scrolled ? "scrolled" : ""}`}>
         <div className="nav-logo">⚡ NEXUS</div>
         <div className="nav-links">
-          {["Home", "Shop", "Deals", "Categories", "About"].map((l) => (
-            <a key={l} href="#" className="nav-link">{l}</a>
-          ))}
+          <Link to="/" className="nav-link">Home</Link>
+          <Link to="/shop" className="nav-link">Shop</Link>
+          <Link to="/deals" className="nav-link">Deals</Link>
+          <Link to="/categories" className="nav-link">Categories</Link>
+          <Link to="/about" className="nav-link">About</Link>
         </div>
         <div className="nav-actions">
           <button className="nav-icon-btn" onClick={() => setSearchOpen(!searchOpen)} title="Search">🔍</button>
@@ -117,9 +450,18 @@ export default function LandingPage() {
           <button className="nav-icon-btn cart-btn" onClick={() => setCartPop(!cartPop)}>
             🛒 {cart.length > 0 && <span className="nav-badge">{cart.length}</span>}
           </button>
-          <button className="nav-profile" onClick={handleProfileClick}>
-            {user ? user.name.split(' ')[0] : 'Sign In'}
-          </button>
+          {user ? (
+            <Avatar 
+              name={user.name} 
+              size="medium"
+              onClick={handleProfileClick}
+              showTooltip={true}
+            />
+          ) : (
+            <button className="nav-profile" onClick={handleProfileClick}>
+              Sign In
+            </button>
+          )}
         </div>
  
         {/* SEARCH BAR */}
@@ -174,8 +516,17 @@ export default function LandingPage() {
           <h1 className="hero-title">{hero.title}</h1>
           <p className="hero-sub">{hero.sub}</p>
           <div className="hero-btns">
-            <button className="hero-cta">{hero.cta} →</button>
-            <button className="hero-secondary">View All</button>
+            <button 
+              className="hero-cta"
+              onClick={() => {
+                if (hero.cta === "Shop Audio") navigate("/shop");
+                else if (hero.cta === "Explore Now") navigate("/shop");
+                else if (hero.cta === "View Deals") navigate("/deals");
+              }}
+            >
+              {hero.cta} →
+            </button>
+            <button className="hero-secondary" onClick={() => navigate("/shop")}>View All</button>
           </div>
           <div className="hero-stats">
             {STATS.map((s) => (
@@ -207,13 +558,21 @@ export default function LandingPage() {
       <section className="lp-cats">
         <div className="cats-inner">
           {CATEGORIES.map((cat) => (
-            <button
+            <Link
               key={cat}
+              to={cat === "All" ? "/" : `/?category=${encodeURIComponent(cat)}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className={`cat-pill ${activeCategory === cat ? "active" : ""}`}
-              onClick={() => setActiveCategory(cat)}
+              onClick={(e) => {
+                if (!e.ctrlKey && !e.metaKey) {
+                  e.preventDefault();
+                  setActiveCategory(cat);
+                }
+              }}
             >
               {cat}
-            </button>
+            </Link>
           ))}
         </div>
       </section>
@@ -251,8 +610,33 @@ export default function LandingPage() {
               >
                 {wishlist.includes(product.id) ? "♥" : "♡"}
               </button>
-              <div className="p-emoji-wrap">
-                <div className="p-emoji">{product.emoji}</div>
+              <div className="p-image-wrap">
+                <img 
+                  src={product.image} 
+                  alt={product.name}
+                  className="p-image"
+                  loading="lazy"
+                  onError={(e) => {
+                    // Fallback to emoji-based placeholder if image fails
+                    const emojiMap = {
+                      '🎧': 'headphones',
+                      '💻': 'laptop',
+                      '⌚': 'smartwatch',
+                      '⌨️': 'keyboard',
+                      '📷': 'camera',
+                      '🖱️': 'mouse',
+                      '🖥️': 'monitor',
+                      '🎵': 'earbuds',
+                      '🔊': 'speaker',
+                      '🔌': 'adapter',
+                      '🔋': 'charger',
+                      '🎮': 'gaming'
+                    };
+                    const keyword = emojiMap[product.emoji] || 'product';
+                    e.target.src = `https://placehold.co/500x500/f3f4f6/667eea?text=${keyword}`;
+                    e.target.alt = `${product.name} - Image unavailable`;
+                  }}
+                />
               </div>
               <div className="p-info">
                 <span className="p-cat">{product.cat}</span>
@@ -282,13 +666,29 @@ export default function LandingPage() {
           <span className="promo-label">🔥 Today's Deal</span>
           <h3>Flat ₹500 Off</h3>
           <p>On orders above ₹2999</p>
-          <button className="promo-btn">Claim Now</button>
+          <button 
+            className="promo-btn"
+            onClick={() => {
+              showToast('🎉 Coupon Applied! Use code: DEAL500');
+              navigate('/deals');
+            }}
+          >
+            Claim Now →
+          </button>
         </div>
         <div className="promo-card promo-right">
           <span className="promo-label">📦 Free Delivery</span>
           <h3>Across India</h3>
           <p>On all orders above ₹999</p>
-          <button className="promo-btn">Shop Now</button>
+          <button 
+            className="promo-btn"
+            onClick={() => {
+              showToast('🛍️ Redirecting to shop...');
+              navigate('/shop');
+            }}
+          >
+            Shop Now →
+          </button>
         </div>
       </section>
  
@@ -300,18 +700,50 @@ export default function LandingPage() {
             <p>Your premium shopping destination for electronics & lifestyle.</p>
             <div className="footer-socials">
               {["𝕏", "📘", "📸", "▶️"].map((s, i) => (
-                <button key={i} className="social-icon">{s}</button>
+                <button key={i} className="social-icon" onClick={() => alert('Social media coming soon!')}>{s}</button>
               ))}
             </div>
           </div>
           {[
-            { title: "Shop", links: ["Electronics", "Wearables", "Accessories", "Deals"] },
-            { title: "Support", links: ["Track Order", "Returns", "FAQs", "Contact Us"] },
-            { title: "Company", links: ["About", "Careers", "Blog", "Press"] },
+            { 
+              title: "Shop", 
+              links: [
+                { label: "All Categories", path: "/shop-categories" },
+                { label: "Deals", path: "/deals" },
+                { label: "Electronics", path: "/shop?category=Audio" },
+                { label: "Wearables", path: "/shop?category=Wearables" }
+              ] 
+            },
+            { 
+              title: "Support", 
+              links: [
+                { label: "Help Center", path: "/support" },
+                { label: "Track Order", path: "/support" },
+                { label: "Returns", path: "/support" },
+                { label: "Contact Us", path: "/support" }
+              ] 
+            },
+            { 
+              title: "Company", 
+              links: [
+                { label: "About Us", path: "/about" },
+                { label: "Our Team", path: "/company" },
+                { label: "Careers", path: "/company" },
+                { label: "Blog", path: "/company" }
+              ] 
+            },
           ].map((col) => (
             <div key={col.title} className="footer-col">
               <h4>{col.title}</h4>
-              {col.links.map((l) => <a key={l} href="#">{l}</a>)}
+              {col.links.map((item, idx) => (
+                <button 
+                  key={idx} 
+                  onClick={() => navigate(item.path)} 
+                  className="footer-link"
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
           ))}
         </div>

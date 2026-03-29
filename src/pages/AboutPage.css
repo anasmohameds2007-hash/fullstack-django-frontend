@@ -538,6 +538,32 @@
   padding-top: 2rem;
 }
 
+.footer-link {
+  background: none;
+  border: none;
+  color: #707070;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.footer-link:hover {
+  color: #ff4d00;
+}
+
+.social-links .footer-link {
+  padding: 0.5rem 1rem;
+  background: rgba(255, 77, 0, 0.1);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.social-links .footer-link:hover {
+  background: rgba(255, 77, 0, 0.2);
+}
+
 /* RESPONSIVE */
 @media (max-width: 768px) {
   .about-nav {
