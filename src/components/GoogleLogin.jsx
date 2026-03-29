@@ -3,8 +3,8 @@ import './GoogleLogin.css';
 
 export default function GoogleLoginButton({ onLogin }) {
   const handleGoogleLogin = () => {
-    // Redirect to backend Google OAuth endpoint
-    window.location.href = 'http://localhost:5000/api/auth/google';
+    // Redirect to backend Google OAuth endpoint (uses production URL from api.js)
+    window.location.href = 'https://ecommerce-ai-server-fgze.onrender.com/api/auth/google';
   };
 
   return (
