@@ -9,14 +9,14 @@
 backend/
 ├── Procfile ✅
 ├── render.yaml ✅
-├── requirements.txt ✅ (with gunicorn, whitenoise, dj-database-url)
+├── requirements.txt ✅ (with gunicorn, whitenoise)
 ├── .env.production ✅
 ├── ecommerce_backend/
 │   ├── settings.py ✅ (WhiteNoise middleware added)
 │   ├── urls.py
 │   └── wsgi.py
 ├── manage.py
-├── db.sqlite3 (will be replaced by PostgreSQL)
+├── db.sqlite3 ✅ (SQLite database)
 └── [apps: users, products, cart]/
 ```
 
@@ -69,27 +69,18 @@ git push origin main
 
 ### STEP 2: Deploy Backend to Render
 
-#### 2.1 Create PostgreSQL Database
+#### 2.1 Create Web Service for Backend (SQLite - No Database Setup Needed!)
 1. Go to https://render.com
-2. Dashboard → New → PostgreSQL
-3. Configuration:
-   - Name: **ecommerce-db**
-   - Region: **Frankfurt (EU)** or closest to you
-   - PostgreSQL Version: **13+**
-4. Create and copy **Internal Database URL**
-   - Format: `postgresql://user:password@hostname:5432/dbname`
-
-#### 2.2 Create Web Service for Backend
-1. Dashboard → New → Web Service
-2. Connect GitHub → Select **fullstack-django-frontend**
-3. Configuration:
+2. Dashboard → New → Web Service
+3. Connect GitHub → Select **fullstack-django-frontend**
+4. Configuration:
    - Name: **ecommerce-backend**
    - Environment: **Python 3**
-   - Region: **Same as Database**
-   - Build Command: ✅ Keep default (Render auto-detects)
-   - Start Command: ✅ Keep default (Render auto-detects Procfile)
+   - Region: **Frankfurt (EU)** or closest to you
+   - Build Command: ✅ Keep default (Render auto-detects from Procfile)
+   - Start Command: ✅ Keep default (Render auto-detects from Procfile)
 
-#### 2.3 Set Environment Variables
+#### 2.2 Set Environment Variables
 Before deploying, add these in **Settings → Environment**:
 
 ```
@@ -101,8 +92,9 @@ ALLOWED_HOSTS=ecommerce-backend.onrender.com
 # CORS (Update after frontend deployment)
 CORS_ALLOWED_ORIGINS=https://your-frontend.vercel.app
 
-# Database (from PostgreSQL instance)
-DATABASE_URL=<PASTE_INTERNAL_DATABASE_URL>
+# Database (SQLite - No setup needed!)
+DB_ENGINE=django.db.backends.sqlite3
+DB_NAME=db.sqlite3
 
 # Optional
 GOOGLE_CLIENT_ID=<YOUR_GOOGLE_ID>
@@ -117,13 +109,13 @@ python -c "from django.core.management.utils import get_random_secret_key; print
 # Copy the output and paste into Render
 ```
 
-#### 2.4 Deploy Backend
+#### 2.3 Deploy Backend
 1. Save environment variables
 2. Render will auto-deploy from GitHub
 3. Wait for "Deploy successful" message
 4. Note the URL: `https://ecommerce-backend.onrender.com`
 
-#### 2.5 Create Superuser
+#### 2.4 Create Superuser
 1. Dashboard → Your Service → Shell tab
 2. Run:
 ```bash
@@ -131,7 +123,7 @@ python manage.py createsuperuser
 ```
 3. Enter credentials (email: admin@example.com, password: admin123)
 
-#### 2.6 Test Backend
+#### 2.5 Test Backend
 ```bash
 # In browser or terminal
 curl https://ecommerce-backend.onrender.com/api/products/
@@ -317,7 +309,7 @@ React frontend with Django REST API backend for e-commerce platform.
 ## Technology Stack
 - **Frontend**: React 19, React Router v7, Axios
 - **Backend**: Django 4.2, Django REST Framework
-- **Database**: PostgreSQL 13
+- **Database**: SQLite 3
 - **Deployment**: Vercel (Frontend), Render (Backend)
 - **Authentication**: Google OAuth 2.0, JWT Tokens
 
